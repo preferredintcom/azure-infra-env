@@ -24,21 +24,16 @@ jobs:
       - name: Terraform Init
         run: terraform init
         working-directory: ./environments/dev
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
+        run: terraform plan -out=tfplan
         working-directory: ./environments/dev
 
-      - name: Save Terraform Plan
+      - name: Upload Terraform Plan
         uses: actions/upload-artifact@v3
         with:
-          name: tfplan
-          path: ./environments/dev/tfplan
+          name: terraform-plan
+          path: environments/dev/tfplan
 
   deploy:
     if: github.ref == 'refs/heads/main'
@@ -60,18 +55,13 @@ jobs:
       - name: Download Terraform Plan
         uses: actions/download-artifact@v3
         with:
-          name: tfplan
-          path: ./environments/dev
+          name: terraform-plan
+          path: environments/dev
 
       - name: Terraform Init
         run: terraform init
         working-directory: ./environments/dev
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve environments/dev/tfplan
         working-directory: ./environments/dev
