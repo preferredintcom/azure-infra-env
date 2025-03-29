@@ -1,8 +1,10 @@
 provider "azurerm" {
   features {}
   # Explicitly use Service Principal (optional, but ensures clarity)
-  subscription_id = var.subscription_id  # Add this variable
-  tenant_id       = var.tenant_id        # Add this variable
+  client_id       = var.client_id
+  client_secret   = var.client_secret
+  tenant_id       = var.tenant_id
+  subscription_id = var.subscription_id
 }
 
 resource "azurerm_resource_group" "rg" {
