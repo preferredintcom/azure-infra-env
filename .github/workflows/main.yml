@@ -4,6 +4,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+permissions:
+  id-token: write
+  contents: read
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -13,12 +16,17 @@ jobs:
         with: { terraform_version: "1.5.0" }
       - name: Azure Login action
         uses: azure/login@v2
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+      - name: Azure CLI script
+        uses: azure/cli@v2
+        with:
+            azcliversion: latest
+            inlineScript: |
+              az account show
       - name: Terraform Init
         run: terraform init
         working-directory: ./environments/dev
@@ -45,11 +53,18 @@ jobs:
         with: { terraform_version: "1.5.0" }
       - name: Azure Login action
         uses: azure/login@v2
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+
+      - name: Azure CLI script
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az account show
       - name: Terraform Init
         run: terraform init
         working-directory: ./environments/dev
