@@ -2,14 +2,17 @@ name: Deploy Terraform
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+
 permissions:
   id-token: write
   contents: read
+
 jobs:
   plan:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v2
@@ -19,28 +22,28 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Verify Azure Login
-        run: az account show
       - name: Terraform Init
-        run: terraform init -backend=false
-        working-directory: ./environments/dev
+        run: terraform init -backend-config=./environments/${{ matrix.environment }}/backend.tfvars
+        working-directory: ./environments/${{ matrix.environment }}
+      - name: Check directory
+        run: ls -l ./environments/dev
+      
       - name: Terraform Plan
         run: terraform plan -out=tfplan
-        working-directory: ./environments/dev
-      - name: Verify tfplan Exists
-        run: ls -l environments/dev/tfplan || echo "tfplan not found"
-      - name: Debug Artifact Upload
-        run: echo "Uploading tfplan from $(pwd)/environments/dev/tfplan"
+        working-directory: ./environments/${{ matrix.environment }}
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: tfplan
-          path: environments/dev/tfplan
-          if-no-files-found: error
+          name: tfplan-${{ matrix.environment }}
+          path: environments/${{ matrix.environment }}/tfplan
+
   deploy:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: plan
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v2
@@ -51,15 +54,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Terraform Init
-        run: terraform init -backend=false
-        working-directory: ./environments/dev
+        run: terraform init -backend-config=./environments/${{ matrix.environment }}/backend.tfvars
+        working-directory: ./environments/${{ matrix.environment }}
       - name: Download Plan Artifact
         uses: actions/download-artifact@v3
         with:
-          name: tfplan
-          path: environments/dev/
-      - name: Verify tfplan Downloaded
-        run: ls -l environments/dev/tfplan || echo "tfplan not downloaded"
+          name: tfplan-${{ matrix.environment }}
+          path: environments/${{ matrix.environment }}/
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
-        working-directory: ./environments/dev
+        working-directory: ./environments/${{ matrix.environment }}
