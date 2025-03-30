@@ -26,16 +26,17 @@ jobs:
         run: terraform init -backend-config=./environments/${{ matrix.environment }}/backend.tfvars
         working-directory: ./environments/${{ matrix.environment }}
       - name: Check directory
-        run: ls -l ./environments/dev
-      
+        run: ls -l ./environments/${{ matrix.environment }}
       - name: Terraform Plan
         run: terraform plan -out=tfplan
         working-directory: ./environments/${{ matrix.environment }}
+      - name: Verify tfplan Exists
+        run: ls -l ./environments/${{ matrix.environment }}/tfplan || echo "tfplan not found"
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v3
         with:
           name: tfplan-${{ matrix.environment }}
-          path: environments/${{ matrix.environment }}/tfplan
+          path: ./environments/${{ matrix.environment }}/tfplan
 
   deploy:
     if: github.ref == 'refs/heads/main'
@@ -60,7 +61,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tfplan-${{ matrix.environment }}
-          path: environments/${{ matrix.environment }}/
+          path: ./environments/${{ matrix.environment }}
+      - name: Verify tfplan Downloaded
+        run: ls -l ./environments/${{ matrix.environment }}/tfplan || echo "tfplan not downloaded"
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve ./environments/${{ matrix.environment }}/tfplan
         working-directory: ./environments/${{ matrix.environment }}
