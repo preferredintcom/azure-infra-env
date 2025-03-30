@@ -1,6 +1,9 @@
 provider "azurerm" {
   features {}
- 
+ client_id       = var.client_id
+  client_secret   = var.client_secret
+  tenant_id       = var.tenant_id
+  subscription_id = var.subscription_id
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -21,6 +24,10 @@ module "vnet" {
   }
   enable_nsg = true
   tags       = { environment = "prod" }
+  client_id       = var.client_id       # Passed from the root module
+  client_secret   = var.client_secret   # Passed from the root module
+  tenant_id       = var.tenant_id       # Passed from the root module
+  subscription_id = var.subscription_id # Passed from the root module
 }
 
 # Virtual Machine

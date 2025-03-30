@@ -1,14 +1,3 @@
-terraform {
-  cloud { 
-    
-    organization = "azureservicestask" 
-
-    workspaces { 
-      name = "terrabeast" 
-    } 
-  } 
-  
-}
 provider "azurerm" {
   features {}
   client_id       = var.client_id
