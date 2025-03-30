@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: [dev, staging, prod]
+        environment: [dev, prod]
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v2
@@ -27,9 +27,15 @@ jobs:
         working-directory: ./environments/${{ matrix.environment }}
       - name: Check directory
         run: ls -l ./environments/${{ matrix.environment }}
+        
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        run: terraform plan -out=tfplan -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}" -backend=false
         working-directory: ./environments/${{ matrix.environment }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       - name: Verify tfplan Exists
         run: ls -l ./environments/${{ matrix.environment }}/tfplan || echo "tfplan not found"
       - name: Upload Plan Artifact
@@ -44,7 +50,7 @@ jobs:
     needs: plan
     strategy:
       matrix:
-        environment: [dev, staging, prod]
+        environment: [dev, prod]
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v2
