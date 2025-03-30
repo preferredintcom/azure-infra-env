@@ -71,5 +71,5 @@ jobs:
       - name: Verify tfplan Downloaded
         run: ls -l ./environments/${{ matrix.environment }}/tfplan || echo "tfplan not downloaded"
       - name: Terraform Apply
-        run: terraform apply -auto-approve ./environments/${{ matrix.environment }}/tfplan
+        run: terraform apply ./environments/${{ matrix.environment }}/tfplan -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
         working-directory: ./environments/${{ matrix.environment }}
