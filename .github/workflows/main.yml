@@ -4,11 +4,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-
 permissions:
-  id-token: write   # For OIDC or artifact upload/download
-  contents: read    # For checkout
-
+  id-token: write
+  contents: read
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -22,22 +20,23 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Verify Azure Login
-        run: az account show  # Confirms login works
+        run: az account show
       - name: Terraform Init
-        run: terraform init -backend=false  # Disable cloud backend for local plan
+        run: terraform init -backend=false
         working-directory: ./environments/dev
       - name: Terraform Plan
         run: terraform plan -out=tfplan
         working-directory: ./environments/dev
       - name: Verify tfplan Exists
         run: ls -l environments/dev/tfplan || echo "tfplan not found"
+      - name: Debug Artifact Upload
+        run: echo "Uploading tfplan from $(pwd)/environments/dev/tfplan"
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v3
         with:
           name: tfplan
           path: environments/dev/tfplan
           if-no-files-found: error
-
   deploy:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -52,13 +51,15 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Terraform Init
-        run: terraform init -backend=false  # Consistent with plan
+        run: terraform init -backend=false
         working-directory: ./environments/dev
       - name: Download Plan Artifact
         uses: actions/download-artifact@v3
         with:
           name: tfplan
           path: environments/dev/
+      - name: Verify tfplan Downloaded
+        run: ls -l environments/dev/tfplan || echo "tfplan not downloaded"
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
         working-directory: ./environments/dev
