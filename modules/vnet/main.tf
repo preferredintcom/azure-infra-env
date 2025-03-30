@@ -1,3 +1,14 @@
+terraform {
+  cloud { 
+    
+    organization = "azureservicestask" 
+
+    workspaces { 
+      name = "terrabeast" 
+    } 
+  } 
+  
+}
 provider "azurerm" {
   features {}
   
