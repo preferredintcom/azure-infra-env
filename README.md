@@ -65,6 +65,7 @@ The workflow consists of two jobs:
 ## Permissions
 
 - `contents: read` - Grants read access to the repository.
+- `environment: [dev,prod]` - settings >> environment  configured for reviewer approval for deployment to prod.
 
 ## Job Details
 
