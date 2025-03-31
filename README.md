@@ -67,6 +67,9 @@ The workflow consists of two jobs:
 - `contents: read` - Grants read access to the repository.
 - `environment: [dev,prod]` - settings >> environment  configured for reviewer approval for deployment to prod.
 
+  <img width="1647" alt="Screenshot 2025-03-31 at 7 25 08 PM" src="https://github.com/user-attachments/assets/45021d44-e322-4702-8c2a-175d0490f971" />
+
+
 ## Job Details
 
 ### Plan Job
