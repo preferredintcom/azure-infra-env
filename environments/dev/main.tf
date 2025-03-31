@@ -1,6 +1,6 @@
 provider "azurerm" {
   features {}
-  # Explicitly use Service Principal (optional, but ensures clarity)
+  
   client_id       = var.client_id
   client_secret   = var.client_secret
   tenant_id       = var.tenant_id
@@ -25,10 +25,10 @@ module "vnet" {
   }
   enable_nsg = true
   tags       = { environment = "dev" }
-  client_id       = var.client_id       # Passed from the root module
-  client_secret   = var.client_secret   # Passed from the root module
-  tenant_id       = var.tenant_id       # Passed from the root module
-  subscription_id = var.subscription_id # Passed from the root module
+  client_id       = var.client_id       
+  client_secret   = var.client_secret   
+  tenant_id       = var.tenant_id       
+  subscription_id = var.subscription_id
 }
 
 # Virtual Machine

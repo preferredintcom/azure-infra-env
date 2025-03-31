@@ -4,3 +4,5 @@
 *.tfstate.backup
 *.tfstate
 *.tfstate.backup
+environments/.DS_Store
+.DS_Store
